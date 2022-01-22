@@ -2,7 +2,7 @@ use crate::Map;
 use std::fmt;
 use std::io;
 
-use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
 use error::{Error, Result};
 use raw;
@@ -86,12 +86,12 @@ impl Value {
                 // checking its type.
                 if vals.is_empty() {
                     dst.write_u8(0)?; // TAG_End
-                    dst.write_i32::<BigEndian>(0)?;
+                    dst.write_i32::<LittleEndian>(0)?;
                 } else {
                     // Otherwise, use the first element of the list.
                     let first_id = vals[0].id();
                     dst.write_u8(first_id)?;
-                    dst.write_i32::<BigEndian>(vals.len() as i32)?;
+                    dst.write_i32::<LittleEndian>(vals.len() as i32)?;
                     for nbt in vals {
                         // Ensure that all of the tags are the same type.
                         if nbt.id() != first_id {
@@ -134,7 +134,7 @@ impl Value {
             0x09 => {
                 // List
                 let id = src.read_u8()?;
-                let len = src.read_i32::<BigEndian>()? as usize;
+                let len = src.read_i32::<LittleEndian>()? as usize;
                 let mut buf = Vec::with_capacity(len);
                 for _ in 0..len {
                     buf.push(Value::from_reader(id, src)?);
